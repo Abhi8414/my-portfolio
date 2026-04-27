@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abhishek Kumar — Backend Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #1e1e1e;
+    --accent: #00e5a0;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #666;
+    --tag-bg: #161616;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* GRID LINES */
+  .grid-lines {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative;
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    animation: fadeSlideDown 0.8s ease both;
+  }
+
+  header::after {
+    content: 'DEV';
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Syne', sans-serif;
+    font-size: 180px;
+    font-weight: 800;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.04);
+    pointer-events: none;
+    letter-spacing: -10px;
+  }
+
+  .header-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-label::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+  }
+
+  h1 span {
+    color: var(--accent);
+    display: block;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 32px;
+  }
+
+  .header-meta a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .header-meta a:hover { color: var(--accent); }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .meta-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* STATUS BADGE */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.2);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    min-height: 100vh;
+  }
+
+  .left-col {
+    border-right: 1px solid var(--border);
+    padding: 60px;
+  }
+
+  .right-col {
+    padding: 60px 40px;
+  }
+
+  /* SECTIONS */
+  section {
+    margin-bottom: 64px;
+    animation: fadeSlideUp 0.6s ease both;
+  }
+
+  section:nth-child(1) { animation-delay: 0.1s; }
+  section:nth-child(2) { animation-delay: 0.2s; }
+  section:nth-child(3) { animation-delay: 0.3s; }
+  section:nth-child(4) { animation-delay: 0.4s; }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* EXPERIENCE */
+  .job {
+    border-left: 1px solid var(--border);
+    padding-left: 28px;
+    margin-bottom: 40px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .job:hover { border-color: var(--accent); }
+  .job::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    transition: transform 0.3s;
+  }
+  .job:hover::before { transform: scale(1.4); }
+
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .job-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .job-period {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    padding: 3px 10px;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .job-company {
+    font-size: 12px;
+    color: var(--accent2);
+    margin-bottom: 14px;
+    letter-spacing: 0.05em;
+  }
+
+  .job ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .job li {
+    font-size: 13px;
+    color: #aaa;
+    padding-left: 16px;
+    position: relative;
+  }
+  .job li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  /* PROJECTS */
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .project-card:hover {
+    border-color: rgba(0,229,160,0.3);
+    transform: translateY(-2px);
+  }
+  .project-card:hover::before { opacity: 1; }
+
+  .project-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .tech-tag {
+    font-size: 10px;
+    padding: 3px 9px;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .project-desc {
+    font-size: 12px;
+    color: #999;
+    line-height: 1.6;
+  }
+
+  .project-urls {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .project-url {
+    font-size: 11px;
+    color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(255,107,53,0.3);
+    padding-bottom: 1px;
+    transition: color 0.2s;
+  }
+  .project-url:hover { color: #fff; }
+
+  /* SKILLS */
+  .skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .skill-chip {
+    font-size: 12px;
+    padding: 7px 14px;
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .skill-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,229,160,0.05);
+  }
+
+  /* EDUCATION */
+  .edu-item {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .edu-item:last-child { border-bottom: none; }
+
+  .edu-degree {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .edu-school {
+    font-size: 12px;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .edu-meta {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 16px;
+  }
+
+  /* CERTIFICATIONS + WORKSHOPS */
+  .list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .list-item {
+    font-size: 12px;
+    color: #aaa;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    border-left: 2px solid var(--accent2);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 60px;
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    .left-col { border-right: none; border-bottom: 1px solid var(--border); padding: 40px 24px; }
+    .right-col { padding: 40px 24px; }
+    header { padding: 50px 24px 40px; }
+    header::after { display: none; }
+    footer { padding: 20px 24px; flex-direction: column; gap: 8px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="grid-lines"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-label">Portfolio</div>
+  <div class="status-badge">
+    <span class="status-dot"></span>
+    Available for opportunities
+  </div>
+  <h1>Abhishek<span>Kumar</span></h1>
+  <p style="color:#888; max-width:500px; font-size:13px;">Backend Developer specializing in Laravel, RESTful APIs, and scalable web systems. 4+ years building production-grade applications.</p>
+  <div class="header-meta">
+    <div class="meta-item"><span class="meta-dot"></span>Noida, Uttar Pradesh</div>
+    <div class="meta-item"><span class="meta-dot"></span><a href="mailto:itsmeabhishek1214@gmail.com">itsmeabhishek1214@gmail.com</a></div>
+    <div class="meta-item"><span class="meta-dot"></span><a href="tel:+917903790873">+91 7903790873</a></div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+  <!-- LEFT COL -->
+  <div class="left-col">
+
+    <!-- EXPERIENCE -->
+    <section>
+      <div class="section-label">Experience</div>
+
+      <div class="job">
+        <div class="job-header">
+          <div class="job-title">Backend Developer</div>
+          <div class="job-period">Dec 2024 – Present</div>
+        </div>
+        <div class="job-company">Havelock Island Beach Resort Pvt. Ltd</div>
+        <ul>
+          <li>Developed and maintained backend functionalities using Laravel Framework</li>
+          <li>Integrated Payment Gateways for secure and efficient online bookings</li>
+          <li>Built and managed RESTful APIs for internal operations and third-party services</li>
+          <li>Managed all resort websites ensuring performance, security, and scalability</li>
+          <li>Server monitoring, debugging, and performance optimization</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-header">
+          <div class="job-title">Web Developer</div>
+          <div class="job-period">Aug 2021 – Nov 2024</div>
+        </div>
+        <div class="job-company">Alliance Web Solution Pvt. Ltd (IndiaInternets), Noida</div>
+        <ul>
+          <li>Backend development using Laravel, MySQL, and Vue.js</li>
+          <li>Created dynamic web applications and integrated third-party APIs</li>
+          <li>Collaborated with design team on responsive, functional web interfaces</li>
+          <li>Optimized database queries and maintained data consistency</li>
+        </ul>
+      </div>
+
+      <div class="job">
+        <div class="job-header">
+          <div class="job-title">Software Developer (Training)</div>
+          <div class="job-period">Mar 2021 – Jul 2021</div>
+        </div>
+        <div class="job-company">Codefire Technologies Pvt. Ltd, Noida</div>
+        <ul>
+          <li>Intensive training in PHP, Laravel Framework, and MySQL</li>
+          <li>Built demo applications and collaborated on team-based assignments</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section>
+      <div class="section-label">Projects</div>
+
+      <div class="project-card">
+        <div class="project-name">Blox</div>
+        <div class="project-tech">
+          <span class="tech-tag">Laravel</span>
+          <span class="tech-tag">REST API</span>
+          <span class="tech-tag">MySQL</span>
+          <span class="tech-tag">Migrations</span>
+        </div>
+        <div class="project-desc">Enterprise-level platform built collaboratively with a team of 12. Contributed to backend architecture, API design, and database management via migrations.</div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">Travel Tour Websites</div>
+        <div class="project-tech">
+          <span class="tech-tag">Laravel</span>
+          <span class="tech-tag">Vue.js</span>
+          <span class="tech-tag">REST API</span>
+          <span class="tech-tag">MySQL</span>
+        </div>
+        <div class="project-desc">Developed full backend and API layer for multiple production travel booking websites, handling tour listings, bookings, and third-party integrations.</div>
+        <div class="project-urls">
+          <a href="https://andamanisland.in" target="_blank" class="project-url">andamanisland.in</a>
+          <a href="https://mytravellites.com" target="_blank" class="project-url">mytravellites.com</a>
+          <a href="https://grandindiatour.com" target="_blank" class="project-url">grandindiatour.com</a>
+          <a href="https://holidaybookin.com" target="_blank" class="project-url">holidaybookin.com</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">Hostel Room Booking</div>
+        <div class="project-tech">
+          <span class="tech-tag">Laravel</span>
+          <span class="tech-tag">REST API</span>
+          <span class="tech-tag">MySQL</span>
+          <span class="tech-tag">Bootstrap</span>
+          <span class="tech-tag">JavaScript</span>
+          <span class="tech-tag">CSS</span>
+          <span class="tech-tag">HTML</span>
+        </div>
+        <div class="project-desc">Built a full-featured hostel room booking platform with real-time availability, online payment integration, and booking management for guests and admins.</div>
+        <ul style="list-style:none; margin-top:12px; display:flex; flex-direction:column; gap:6px;">
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>Room listing and availability management system</li>
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>Secure online booking with payment gateway integration</li>
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>Admin panel for reservations, check-ins, and guest management</li>
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>RESTful APIs for frontend and third-party integrations</li>
+        </ul>
+        <div class="project-urls" style="margin-top:12px;">
+          <a href="http://hostelnemo.com" target="_blank" class="project-url">hostelnemo.com</a>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">Yacht Booking</div>
+        <div class="project-tech">
+          <span class="tech-tag">Laravel</span>
+          <span class="tech-tag">REST API</span>
+          <span class="tech-tag">MySQL</span>
+          <span class="tech-tag">Bootstrap</span>
+          <span class="tech-tag">JavaScript</span>
+          <span class="tech-tag">CSS</span>
+          <span class="tech-tag">HTML</span>
+        </div>
+        <div class="project-desc">Developed a yacht rental and booking platform for the Andaman region, enabling customers to browse, schedule, and book yacht experiences online.</div>
+        <ul style="list-style:none; margin-top:12px; display:flex; flex-direction:column; gap:6px;">
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>Yacht listing with schedules, capacity, and pricing details</li>
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>Online reservation system with date and slot management</li>
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>Payment gateway integration for secure transactions</li>
+          <li style="font-size:13px; color:#aaa; padding-left:16px; position:relative;"><span style="position:absolute;left:0;color:var(--accent);font-size:11px;">&#x2192;</span>Backend APIs powering dynamic frontend experience</li>
+        </ul>
+        <div class="project-urls" style="margin-top:12px;">
+          <a href="http://andamanyachtrentals.com" target="_blank" class="project-url">andamanyachtrentals.com</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- RIGHT COL -->
+  <div class="right-col">
+
+    <!-- SKILLS -->
+    <section>
+      <div class="section-label">Skills</div>
+      <div class="skills-grid">
+        <div class="skill-chip">PHP</div>
+        <div class="skill-chip">Laravel</div>
+        <div class="skill-chip">MySQL</div>
+        <div class="skill-chip">Vue.js</div>
+        <div class="skill-chip">REST APIs</div>
+        <div class="skill-chip">JavaScript</div>
+        <div class="skill-chip">jQuery</div>
+        <div class="skill-chip">HTML5</div>
+        <div class="skill-chip">CSS3</div>
+        <div class="skill-chip">Bootstrap</div>
+        <div class="skill-chip">XML</div>
+        <div class="skill-chip">Git</div>
+      </div>
+    </section>
+
+    <!-- EDUCATION -->
+    <section>
+      <div class="section-label">Education</div>
+      <div class="edu-item">
+        <div class="edu-degree">MCA — CS & IT</div>
+        <div class="edu-school">Central University of Haryana, Mahendergarh</div>
+        <div class="edu-meta"><span>2018 – 2021</span><span>70%</span></div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-degree">BCA</div>
+        <div class="edu-school">B.D. College, Magadh University, Patna</div>
+        <div class="edu-meta"><span>2014 – 2017</span><span>71%</span></div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-degree">Intermediate (12th)</div>
+        <div class="edu-school">G.A. High School, B.S.E.B</div>
+        <div class="edu-meta"><span>2012 – 2014</span><span>62.6%</span></div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-degree">Matric (10th)</div>
+        <div class="edu-school">G.A. High School, B.S.E.B</div>
+        <div class="edu-meta"><span>2011 – 2012</span><span>65%</span></div>
+      </div>
+    </section>
+
+    <!-- CERTIFICATIONS -->
+    <section>
+      <div class="section-label">Certifications & Training</div>
+      <div class="list-items">
+        <div class="list-item">Full Stack Web Development Program (Demo Session) — Edureka</div>
+        <div class="list-item">XML Executive — Thomson Digital Pvt. Ltd, NSEZ Noida</div>
+      </div>
+    </section>
+
+    <!-- WORKSHOPS -->
+    <section>
+      <div class="section-label">Seminars & Workshops</div>
+      <div class="list-items">
+        <div class="list-item">Cyber Security Workshop — JNU, New Delhi</div>
+        <div class="list-item">Oracle Workshop — College Campus</div>
+        <div class="list-item">Seminars at International Conferences during MCA</div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <span>© 2026 Abhishek Kumar</span>
+  <span style="color:#333">abhishek-kumar.dev</span>
+</footer>
+
+</body>
+</html>
